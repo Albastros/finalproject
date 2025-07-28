@@ -38,10 +38,22 @@ export async function GET(req: NextRequest) {
         a.sessionId.toString() === booking._id.toString() &&
         (studentId ? a.studentId === studentId : a.studentId === booking.studentId)
     );
+    // Format time as HH:mm (hour and minute)
+    let formattedTime = booking.sessionTime;
+    if (booking.sessionTime) {
+      // If only hour is provided, add :00
+      if (/^\d{1,2}$/.test(booking.sessionTime)) {
+        formattedTime = booking.sessionTime.padStart(2, '0') + ':00';
+      } else if (/^\d{1,2}:\d{1,2}$/.test(booking.sessionTime)) {
+        // Ensure both hour and minute are two digits
+        const [h, m] = booking.sessionTime.split(":");
+        formattedTime = h.padStart(2, '0') + ':' + m.padStart(2, '0');
+      }
+    }
     return {
       subject: booking.subject,
       date: booking.sessionDate,
-      time: booking.sessionTime,
+      time: formattedTime,
       present: attendance?.present === true ? "Present" : "Absent",
       ...(tutorId && { student: userMap[booking.studentId] || booking.studentId }),
     };

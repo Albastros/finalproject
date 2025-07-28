@@ -51,7 +51,12 @@ export async function GET(req: NextRequest) {
   if (tutoringType && tutoringType !== "none") query.tutoringType = tutoringType;
 
   // Find tutors
-  let tutors = await User.find(query).lean();
+  // Pagination
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const limit = parseInt(searchParams.get("limit") || "6", 10);
+  const skip = (page - 1) * limit;
+  const totalTutors = await User.countDocuments(query);
+  let tutors = await User.find(query).skip(skip).limit(limit).lean();
 
   // Add booking status logic for availability
   const tutorsWithBookingStatus = await Promise.all(
@@ -200,5 +205,11 @@ export async function GET(req: NextRequest) {
     tutors = tutors.map((t) => ({ ...t, avgRating: ratingsMap[(t as any)._id.toString()] ?? 0 }));
   }
 
-  return NextResponse.json({ tutors });
+  return NextResponse.json({
+    tutors,
+    total: totalTutors,
+    page,
+    totalPages: Math.ceil(totalTutors / limit),
+    limit
+  });
 }

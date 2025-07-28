@@ -156,8 +156,18 @@ export default async function TutorProfilePage({
               ? Object.entries(tutor.availability)
                   .filter(([, v]: any) => v.available)
                   .map(
-                    ([day, v]: any) =>
-                      `${day.charAt(0).toUpperCase() + day.slice(1)}: ${v.from} - ${v.to}`
+                    ([day, v]: any) => {
+                      function formatTime(time: string) {
+                        if (!time) return "";
+                        const [h, m] = time.split(":");
+                        let hour = parseInt(h, 10);
+                        const minute = m ? m.padStart(2, "0") : "00";
+                        const ampm = hour >= 12 ? "PM" : "AM";
+                        hour = hour % 12 || 12;
+                        return `${hour}:${minute} ${ampm}`;
+                      }
+                      return `${day.charAt(0).toUpperCase() + day.slice(1)}: ${formatTime(v.from)} - ${formatTime(v.to)}`;
+                    }
                   )
                   .join(" | ") || "Not set"
               : "Not set"}

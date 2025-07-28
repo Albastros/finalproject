@@ -128,13 +128,15 @@ export function UpcomingSessions() {
             </div>
             <div className="flex gap-2 mt-2">
               <div className="w-full relative">
-                <Button
-                  asChild
-                  disabled={!canJoinSession(session)}
-                  className={`w-full ${"bg-slate-600 hover:bg-slate-700"}`}
-                >
-                  <Link href={`/session/${session._id}/join`}>Join Session</Link>
-                </Button>
+                {session.status === "confirmed" && (
+                  <Button
+                    asChild
+                    disabled={!canJoinSession(session)}
+                    className={`w-full ${"bg-slate-600 hover:bg-slate-700"}`}
+                  >
+                    <Link href={`/session/${session._id}/join`}>Join Session</Link>
+                  </Button>
+                )}
                 {/* {!canJoinSession(session) && (
                   <div className="absolute left-0 right-0 mt-1 text-xs text-yellow-700 bg-yellow-100 dark:bg-yellow-900 rounded px-2 py-1 text-center">
                     {getSessionButtonLabel(session)}

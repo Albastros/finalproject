@@ -99,6 +99,13 @@ export function TutorUpcomingSessions() {
   async function handleReschedule(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedSession) return;
+    // Check if new date/time is in the past
+    const now = new Date();
+    const selectedDateTime = new Date(`${newDate}T${newTime}`);
+    if (selectedDateTime < now) {
+      alert("You can only reschedule from today. This time or date is in the past.");
+      return;
+    }
     setSubmitting(true);
     const res = await fetch("/api/bookings/reschedule", {
       method: "PATCH",

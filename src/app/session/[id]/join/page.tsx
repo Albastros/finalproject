@@ -371,7 +371,13 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
           </CardHeader>
           <CardContent>
             <div className="mb-4 text-red-600">{error}</div>
-            <Button onClick={() => router.push("/dashboard/student")}>Go to Dashboard</Button>
+            <Button onClick={() => {
+              if (session?.user?.role === "tutor") {
+                router.push("/tutor");
+              } else {
+                router.push("/student");
+              }
+            }}>Go to Dashboard</Button>
           </CardContent>
         </Card>
       </div>
@@ -542,7 +548,22 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
               <div>
                 <span className="font-semibold">Subject:</span> {sessionData.subject}
               </div>
-              <Button onClick={() => router.push("/dashboard/student")} variant="destructive">
+              <Button
+                onClick={async () => {
+                  // Mark session as completed (move to past)
+                  await fetch("/api/bookings/complete", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ bookingId: sessionData._id }),
+                  });
+                  if (isTutor) {
+                    router.push("/tutor");
+                  } else {
+                    router.push("/student");
+                  }
+                }}
+                variant="destructive"
+              >
                 Leave Session
               </Button>
               {isTutor && (

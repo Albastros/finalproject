@@ -180,136 +180,150 @@ export function SignUpForm({ className, ...props }: React.ComponentProps<"div">)
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign Up</CardTitle>
-          <CardDescription>Enter your information to create an account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <Terminal className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-3">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative">
-                  <Input
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      // Allow only letters and spaces
-                      if (/^[a-zA-Z\s]*$/.test(value)) {
-                        setFullname(value);
-                        setNameError(""); // Clear error when user types valid characters
-                        // Hide tooltip when valid character is typed
-                        if (showNameTooltip) {
-                          setShowNameTooltip(false);
+    <div
+      className={cn(
+        "relative min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e3e7ef] via-[#fbe8ff] to-[#e0f2fe] dark:bg-[#23272f] p-4 overflow-hidden",
+        className
+      )}
+      {...props}
+    >
+      {/* More colorful, vibrant background shapes (same as login) */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-300 opacity-50 rounded-full blur-3xl animate-pulse z-0" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-pink-300 opacity-50 rounded-full blur-3xl animate-pulse z-0" />
+      <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-300 opacity-40 rounded-full blur-2xl animate-pulse z-0" style={{transform:'translate(-50%,-50%)'}} />
+      <div className="w-full max-w-lg z-10">
+        <Card className="backdrop-blur-lg bg-white/80 dark:bg-black/70 shadow-2xl rounded-3xl border-0 transition-transform duration-500 hover:scale-105 hover:shadow-3xl animate-fade-in">
+          <CardHeader className="text-center pb-0">
+            <CardTitle className="text-3xl font-extrabold bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent animate-gradient-x">Sign Up</CardTitle>
+            <CardDescription className="text-base text-gray-600 dark:text-gray-300">Enter your information to create an account</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-6 border border-red-400/70 shadow-lg">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <form onSubmit={(e) => handleSubmit(e)}>
+              <div className="flex flex-col gap-6">
+                <div className="grid gap-3">
+                  <Label htmlFor="name" className="font-semibold text-gray-700 dark:text-gray-200">Full Name</Label>
+                  <div className="relative">
+                    <Input
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^[a-zA-Z\s]*$/.test(value)) {
+                          setFullname(value);
+                          setNameError("");
+                          if (showNameTooltip) {
+                            setShowNameTooltip(false);
+                          }
                         }
-                      }
-                    }}
-                    onKeyPress={(e) => {
-                      // Check if the key is invalid (numbers or symbols)
-                      if (!/[a-zA-Z\s]/.test(e.key)) {
-                        e.preventDefault();
-                        // Show tooltip for invalid character attempt
-                        showInvalidCharacterTooltip();
-                      }
-                    }}
-                    value={fullname}
-                    id="name"
-                    type="text"
-                    placeholder="Achour Meguenni"
-                    required
-                  />
-                  {/* Tooltip for invalid character feedback */}
-                  {showNameTooltip && (
-                    <div className="absolute top-full left-0 mt-1 bg-red-500 text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
-                      Numbers and symbols are not allowed in the name field
-                      <div className="absolute -top-1 left-4 w-2 h-2 bg-red-500 rotate-45"></div>
-                    </div>
+                      }}
+                      onKeyPress={(e) => {
+                        if (!/[a-zA-Z\s]/.test(e.key)) {
+                          e.preventDefault();
+                          showInvalidCharacterTooltip();
+                        }
+                      }}
+                      value={fullname}
+                      id="name"
+                      type="text"
+                      placeholder="Achour Meguenni"
+                      required
+                      className="rounded-xl border-2 border-gray-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200/50 transition-all shadow-sm bg-white/80 dark:bg-gray-900/60"
+                    />
+                    {showNameTooltip && (
+                      <div className="absolute top-full left-0 mt-1 bg-red-500 text-white text-xs px-2 py-1 rounded shadow-lg z-10 whitespace-nowrap">
+                        Numbers and symbols are not allowed in the name field
+                        <div className="absolute -top-1 left-4 w-2 h-2 bg-red-500 rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                  {nameError && (
+                    <p className="text-sm text-red-600">{nameError}</p>
                   )}
                 </div>
-                {nameError && (
-                  <p className="text-sm text-red-600">{nameError}</p>
-                )}
-              </div>
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setEmailError(""); // Clear error when user types
-                  }}
-                  value={email}
-                  id="email"
-                  type="email"
-                  placeholder="me@example.com"
-                  required
-                />
-                {emailError && (
-                  <p className="text-sm text-red-600">{emailError}</p>
-                )}
-
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                <div className="grid gap-3">
+                  <Label htmlFor="email" className="font-semibold text-gray-700 dark:text-gray-200">Email</Label>
+                  <Input
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError("");
+                    }}
+                    value={email}
+                    id="email"
+                    type="email"
+                    placeholder="me@example.com"
+                    required
+                    className="rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200/50 transition-all shadow-sm bg-white/80 dark:bg-gray-900/60"
+                  />
+                  {emailError && (
+                    <p className="text-sm text-red-600">{emailError}</p>
+                  )}
                 </div>
-                <PasswordInput
-                  onChange={(e: any) => {
-                    setPassword(e.target.value);
-                    setPasswordError(""); // Clear error when user types
-                  }}
-                  value={password}
-                  id="password"
-                  type="password"
-                  placeholder={`At least ${settings.passwordMinLength} characters`}
-                  required
-                />
-                {passwordError && (
-                  <p className="text-sm text-red-600">{passwordError}</p>
-                )}
-
-              </div>
-
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="grid gap-3">
+                  <div className="flex items-center">
+                    <Label htmlFor="password" className="font-semibold text-gray-700 dark:text-gray-200">Password</Label>
+                  </div>
+                  <PasswordInput
+                    onChange={(e: any) => {
+                      setPassword(e.target.value);
+                      setPasswordError("");
+                    }}
+                    value={password}
+                    id="password"
+                    type="password"
+                    placeholder={`At least ${settings.passwordMinLength} characters`}
+                    required
+                    className="rounded-xl border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 transition-all shadow-sm bg-white/80 dark:bg-gray-900/60"
+                  />
+                  {passwordError && (
+                    <p className="text-sm text-red-600">{passwordError}</p>
+                  )}
                 </div>
-                <PasswordInput
-                  onChange={(e: any) => {
-                    setConfirmPassword(e.target.value);
-                    setConfirmPasswordError(""); // Clear error when user types
-                  }}
-                  value={confirmPassword}
-                  id="confirmPassword"
-                  type="password"
-                  required
-                />
-                {confirmPasswordError && (
-                  <p className="text-sm text-red-600">{confirmPasswordError}</p>
-                )}
+                <div className="grid gap-3">
+                  <div className="flex items-center">
+                    <Label htmlFor="confirmPassword" className="font-semibold text-gray-700 dark:text-gray-200">Confirm Password</Label>
+                  </div>
+                  <PasswordInput
+                    onChange={(e: any) => {
+                      setConfirmPassword(e.target.value);
+                      setConfirmPasswordError("");
+                    }}
+                    value={confirmPassword}
+                    id="confirmPassword"
+                    type="password"
+                    required
+                    className="rounded-xl border-2 border-gray-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200/50 transition-all shadow-sm bg-white/80 dark:bg-gray-900/60"
+                  />
+                  {confirmPasswordError && (
+                    <p className="text-sm text-red-600">{confirmPasswordError}</p>
+                  )}
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    disabled={loading}
+                    type="submit"
+                    className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200"
+                  >
+                    {loading ? <Loader2 className="animate-spin" strokeWidth={2} /> : "Sign Up"}
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-col gap-3">
-                <Button disabled={loading} type="submit" className="w-full">
-                  {loading ? <Loader2 className="animate-spin" strokeWidth={2} /> : "Sign Up"}
-                </Button>
-              </div>
+              {/* Removed footer or extra bottom links for a cleaner look */}
+            </form>
+          </CardContent>
+          {/* Professional bottom link inside card */}
+          <div className="pt-4 pb-2 px-6">
+            <div className="text-center text-gray-500 dark:text-gray-400 text-sm border-t border-gray-200 dark:border-gray-700 pt-4">
+              Already have an account?{' '}
+              <a href="/login" className="text-pink-500 hover:underline font-semibold">Login</a>
             </div>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <a href="/login" className="underline underline-offset-4">
-                Login
-              </a>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

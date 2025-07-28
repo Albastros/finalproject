@@ -8,6 +8,8 @@ export default function ConditionalFooter() {
   
   // Define routes where footer should be hidden
   const hideFooterRoutes = [
+    '/login',
+    '/signup',
     '/admin',
     '/etn',
     '/student',

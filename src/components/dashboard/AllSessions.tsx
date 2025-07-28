@@ -92,69 +92,61 @@ export function AllSessions() {
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="flex flex-col gap-8">
       {sessions.map((session) => (
         <Card
           key={session._id}
-          className="rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between shadow"
+          className="relative overflow-hidden border-none shadow-xl backdrop-blur-lg bg-white/40 bg-gradient-to-br from-blue-100/60 via-white/80 to-purple-100/60 transition-transform hover:scale-[1.02] hover:shadow-2xl px-6 py-6"
+          style={{ borderRadius: '2rem', border: '1px solid rgba(180,180,255,0.18)' }}
         >
-          <div className="flex items-center gap-3 mb-2 md:mb-0">
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-lg font-bold text-gray-500">
-              {tutorNames[session.tutorId]?.[0] || "?"}
-            </div>
-            <div>
-              <div className="font-medium">
-                Tutor: {tutorNames[session.tutorId] || session.tutorId}
+          {/* Decorative accent */}
+          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-blue-400/30 to-purple-400/10 rounded-full blur-2xl -z-10" />
+          <div className="flex flex-row items-center gap-6 w-full">
+            {/* Tutor avatar and name */}
+            <div className="flex flex-col items-center min-w-[90px]">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-300 via-purple-300 to-pink-300 flex items-center justify-center text-3xl font-extrabold text-white shadow-lg border-4 border-white mb-2">
+                {tutorNames[session.tutorId]?.[0] || "?"}
               </div>
-              <div className="text-xs text-muted-foreground">{session.subject}</div>
+              <span className="text-lg font-bold text-blue-700 text-center">{tutorNames[session.tutorId] || session.tutorId}</span>
+              <span className="text-xs text-muted-foreground font-normal">Tutor</span>
             </div>
-          </div>
-          <div className="text-sm font-medium">
-            {session.sessionDate && !isNaN(Date.parse(session.sessionDate))
-              ? format(parseISO(session.sessionDate), "MMM d, yyyy")
-              : "Invalid date"}
-            <br />
-            {session.sessionTime}
-          </div>
-          <div className="flex flex-col gap-2 ml-0 md:ml-4 mt-2 md:mt-0">
-            <div className="text-xs font-semibold px-2 py-1 rounded bg-muted">{session.status}</div>
-            <Link href={`/chat/${session.tutorId}`}>
-              <Button size="sm" variant="outline">
-                Message Tutor
-              </Button>
-            </Link>
-            {/* Always show Join Session button for students */}
-            <Link href={`/session/${session._id}/join`}>
-              <Button size="sm" variant="default">
-                Join Session
-              </Button>
-            </Link>
-            {/* Materials for this session */}
-            {materialsBySession[session._id]?.length > 0 && (
-              <div className="mt-2">
-                <div className="font-semibold text-xs mb-1">Materials</div>
-                <ul className="space-y-1">
-                  {materialsBySession[session._id].map((mat) => (
-                    <li key={mat._id} className="flex items-center gap-2">
-                      <span className="truncate max-w-[100px]" title={mat.title || mat.fileUrl}>
-                        {mat.title || "Untitled PDF"}
-                      </span>
-                      <a
-                        href={mat.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline text-xs"
-                      >
-                        View/Download
-                      </a>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        {new Date(mat.uploadedAt).toLocaleDateString()}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+            {/* Session info horizontally aligned */}
+            <div className="flex flex-row flex-1 items-center gap-8 justify-between">
+              <div className="flex flex-col items-center gap-2">
+                <span className="flex items-center gap-2 text-purple-700 font-medium">
+                  {/* Notebook icon for course */}
+                  <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v10H4V5zm2 2h8v2H6V7zm0 3h8v2H6v-2zm0 3h5v2H6v-2z"/>
+                  </svg>
+                  {session.subject}
+                </span>
               </div>
-            )}
+              <div className="flex flex-col items-center gap-2">
+                <span className="flex items-center gap-1 text-base font-semibold text-gray-700">
+                  {/* Calendar icon for date */}
+                  <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM4 7h12v8H4V7z"/>
+                  </svg>
+                  {session.sessionDate && !isNaN(Date.parse(session.sessionDate))
+                    ? format(parseISO(session.sessionDate), "MMM d, yyyy")
+                    : "Invalid date"}
+                </span>
+                <span className="flex items-center gap-1 text-base font-semibold text-gray-700">
+                  {/* Clock icon for time */}
+                  <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 4.5V10l3 1.5-1 1.732-4-2V6.5h2z"/>
+                  </svg>
+                  <span className="font-mono text-blue-600">{session.sessionTime}</span>
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${session.status === 'confirmed' ? 'bg-green-200 text-green-700 animate-pulse' : 'bg-yellow-200 text-yellow-700'}`}
+                >
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" /></svg>
+                  {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
+                </span>
+              </div>
+            </div>
           </div>
         </Card>
       ))}

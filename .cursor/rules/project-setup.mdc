@@ -1,0 +1,116 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+    You are building a full-stack tutoring platform using the following tech stack:
+
+        Next.js (App Router) – frontend framework
+
+        MongoDB with Mongoose – database and ODM
+
+        Tailwind CSS + Shadcn UI – for design system and layout
+
+        Axios – for API calls
+
+        App Router – not Pages router
+
+        Role-based access (student, tutor, admin)
+
+🎯 Project Overview
+
+This platform will support three main user roles:
+
+    Student – can search tutors, book sessions, pay, chat, rate tutors
+
+    Tutor – can manage their availability, track students, upload resources
+
+    Admin – can approve tutors, view platform analytics, manage revenue
+
+🧱 High-Level Features
+
+    better auth Authentication
+
+    Dynamic dashboards per role
+
+    Tutor booking + calendar management
+
+    Chapa payment integration (placeholder is fine for now)
+
+    Quizzes, ratings, attendance tracking
+
+    Real-time-ish chat (can be DB-poll-based for MVP)
+
+    Resource upload system (PDFs, docs)
+
+    Admin analytics dashboard
+
+    Bilingual toggle (Amharic | English)
+
+🔧 Folder Structure
+
+Here's how the App Router structure should look:
+
+/app
+  /(auth)
+    /login
+    /register
+  /(dashboard)
+    /student
+    /tutor
+    /admin
+  /api
+    /users
+    /bookings
+    /sessions
+    /payments
+    /messages
+/components
+  ui/ (Shadcn components)
+  shared/
+  dashboard/
+  chat/
+  booking/
+lib/
+  db.ts (Mongoose connection)
+  auth.ts
+models/
+  user.ts
+  booking.ts
+  session.ts
+  message.ts
+  rating.ts
+  payment.ts
+  resource.ts
+
+✅ Initial Task
+
+Start by scaffolding the backend models using Mongoose:
+
+    User: role-based (student, tutor, admin), profile info
+
+    Booking: session reference, student ID, tutor ID, status
+
+    Session: date, time, topic, notes
+
+    Message: sender, receiver, content, timestamp
+
+    Payment: amount, status, payer, payee
+
+    Rating: score, comment, course/session reference
+
+    Resource: file path, tutor ID, type
+
+And also setup:
+
+    MongoDB connection (lib/db.ts)
+
+    Basic API route for user registration
+
+    Protected routes using middleware for role checks
+
+Use TypeScript for all files.
+💬 Final Note
+
+
+Make the code modular, scalable, and clean — write it like you're building a real MVP for a funded edtech startup. Follow Tailwind best practices and use @shadcn/ui components where appropriate (cards, tables, inputs, modals).

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSession } from "@/hooks/use-session";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, parseISO, isWithinInterval, addMinutes } from "date-fns";
+import { format, parseISO, addMinutes } from "date-fns";
 import Script from "next/script";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SessionData {
   _id: string;
@@ -55,39 +56,107 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
   const { data: session } = useSession();
   const router = useRouter();
   const jitsiRef = useRef<HTMLDivElement>(null);
+  
+  // Session state
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Attendance state
   const [attendance, setAttendance] = useState<boolean | null>(null);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendancePercentage, setAttendancePercentage] = useState<number | null>(null);
+  
+  // Rating state
   const [rating, setRating] = useState(3);
   const [comment, setComment] = useState("");
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  
+  // Jitsi state
   const [jitsiLoading, setJitsiLoading] = useState(true);
+  
+  // Dispute state
   const [disputeModal, setDisputeModal] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
   const [disputeSubmitting, setDisputeSubmitting] = useState(false);
+  const [disputePriceAmount, setDisputePriceAmount] = useState("");
+  const [disputeBankNumber, setDisputeBankNumber] = useState("");
+  const [disputeBankCode, setDisputeBankCode] = useState("");
+  const [disputePhoneNumber, setDisputePhoneNumber] = useState("");
+  
+  // Material state
   const [materialModal, setMaterialModal] = useState(false);
   const [materialFile, setMaterialFile] = useState<File | null>(null);
   const [materialTitle, setMaterialTitle] = useState("");
   const [uploading, setUploading] = useState(false);
   const [materials, setMaterials] = useState<any[]>([]);
-  const [disputeBankName, setDisputeBankName] = useState("");
-  const [disputeBankNumber, setDisputeBankNumber] = useState("");
-  const [disputeBankCode, setDisputeBankCode] = useState("");
+  
+  // Validation state
   const [bankList, setBankList] = useState<{ name: string; code: string }[]>([]);
-  const [attendancePercentage, setAttendancePercentage] = useState<number | null>(null);
+  const [priceAmountError, setPriceAmountError] = useState<string>("");
+  const [bankNumberError, setBankNumberError] = useState<string>("");
+  const [phoneNumberError, setPhoneNumberError] = useState<string>("");
+  const [showPhoneTooltip, setShowPhoneTooltip] = useState(false);
+  const [showBankTooltip, setShowBankTooltip] = useState(false);
+  
+  // Other state
   const [studentEmail, setStudentEmail] = useState<string | null>(null);
 
-  const sessionStart = sessionData
+  const isTutor = (session?.user as any)?.role === "tutor";
+  const isStudent = (session?.user as any)?.role === "user";
+
+  // Calculate session timing
+  const now = new Date();
+  const sessionStart = sessionData?.sessionDate && sessionData?.sessionTime
     ? parseISO(`${sessionData.sessionDate}T${sessionData.sessionTime}`)
     : null;
-  const now = new Date();
-  const sessionHasStarted = sessionStart && now >= sessionStart;
   const sessionHasEnded = sessionStart && now > addMinutes(sessionStart, 60);
-  const isTutor = session?.user?.role === "tutor";
-  const isStudent = session?.user?.role === "user";
 
+  // Validation functions
+  const validatePriceAmount = (value: string) => {
+    if (!/^\d*\.?\d*$/.test(value)) {
+      setPriceAmountError("Only numeric values are allowed");
+      return false;
+    }
+    setPriceAmountError("");
+    return true;
+  };
+
+  const validateBankNumber = (value: string) => {
+    if (!/^\d*$/.test(value)) {
+      setBankNumberError("Letters and symbols are not allowed in this field");
+      return false;
+    }
+    if (value.length > 13) {
+      setBankNumberError("Bank account number cannot exceed 13 digits");
+      return false;
+    }
+    setBankNumberError("");
+    return true;
+  };
+
+  const validatePhoneNumber = (value: string) => {
+    const phoneRegex = /^(\+251|0)?[79]\d{8}$/;
+    if (!phoneRegex.test(value)) {
+      setPhoneNumberError("Please enter a valid Ethiopian phone number");
+      return false;
+    }
+    setPhoneNumberError("");
+    return true;
+  };
+
+  // Tooltip functions
+  const showPhoneInvalidTooltip = () => {
+    setShowPhoneTooltip(true);
+    setTimeout(() => setShowPhoneTooltip(false), 3000);
+  };
+
+  const showBankInvalidTooltip = () => {
+    setShowBankTooltip(true);
+    setTimeout(() => setShowBankTooltip(false), 3000);
+  };
+
+  // Fetch session data
   useEffect(() => {
     async function fetchSession() {
       setLoading(true);
@@ -112,10 +181,10 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
     fetchSession();
   }, [params.id]);
 
+  // Access protection
   useEffect(() => {
     if (!sessionData || !session?.user || !jitsiRef.current) return;
 
-    // Access protection
     const isAssigned =
       session.user.id === sessionData.studentId || session.user.id === sessionData.tutorId;
 
@@ -123,8 +192,6 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
       setError("You are not authorized to join this session.");
       return;
     }
-
-    // Remove confirmation check - sessions are auto-confirmed
   }, [sessionData, session]);
 
   // Fetch attendance if tutor
@@ -147,6 +214,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
     }
   }, [isStudent, sessionData]);
 
+  // Fetch materials
   useEffect(() => {
     async function fetchMaterials() {
       if (!sessionData) return;
@@ -157,6 +225,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
     fetchMaterials();
   }, [sessionData]);
 
+  // Fetch banks for dispute modal
   useEffect(() => {
     if (!disputeModal) return;
     async function fetchBanks() {
@@ -183,9 +252,9 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
     fetchBanks();
   }, [disputeModal]);
 
+  // Fetch attendance percentage for student
   useEffect(() => {
     if (isStudent && sessionData) {
-      // Fetch all attendance records for this student/session
       fetch(`/api/attendance?sessionId=${sessionData._id}&studentId=${sessionData.studentId}`)
         .then((res) => res.json())
         .then((data) => {
@@ -200,8 +269,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
     }
   }, [isStudent, sessionData]);
 
-  console.log("Jitsi API available?", window?.JitsiMeetExternalAPI);
-
+  // Event handlers
   async function handleAttendanceToggle(val: boolean) {
     if (!sessionData) return;
     setAttendanceLoading(true);
@@ -241,6 +309,16 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
   async function handleDisputeSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!sessionData) return;
+    
+    // Validate all fields
+    const isPriceValid = validatePriceAmount(disputePriceAmount);
+    const isBankValid = validateBankNumber(disputeBankNumber);
+    const isPhoneValid = validatePhoneNumber(disputePhoneNumber);
+    
+    if (!isPriceValid || !isBankValid || !isPhoneValid) {
+      return;
+    }
+    
     setDisputeSubmitting(true);
     const res = await fetch("/api/disputes", {
       method: "POST",
@@ -248,17 +326,19 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
       body: JSON.stringify({
         bookingId: sessionData._id,
         reason: disputeReason,
-        bankAccountName: disputeBankName,
+        priceAmountPaid: disputePriceAmount,
         bankAccountNumber: disputeBankNumber,
         bankCode: disputeBankCode,
+        phoneNumber: disputePhoneNumber,
       }),
     });
     setDisputeSubmitting(false);
     setDisputeModal(false);
     setDisputeReason("");
-    setDisputeBankName("");
+    setDisputePriceAmount("");
     setDisputeBankNumber("");
     setDisputeBankCode("");
+    setDisputePhoneNumber("");
     if (res.ok) {
       toast.success("Dispute filed successfully.");
       setSessionData((prev) =>
@@ -273,9 +353,10 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                 outcome: undefined,
                 filedAt: new Date().toISOString(),
                 resolvedAt: undefined,
-                bankAccountName: disputeBankName,
+                priceAmountPaid: disputePriceAmount,
                 bankAccountNumber: disputeBankNumber,
                 bankCode: disputeBankCode,
+                phoneNumber: disputePhoneNumber,
               },
             }
           : prev
@@ -326,42 +407,8 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
     }
   }
 
-  if (loading)
-    return (
-      <div className=" ">
-        <div
-          className="flex flex-col items-center justify-center p-8 text-center h-[60vh]"
-          role="status"
-          aria-live="polite"
-          aria-busy="true"
-        >
-          {/* Accessible spinner */}
-          <svg
-            className="animate-spin h-8 w-8 text-blue-500 mb-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-            />
-          </svg>
-          <span className="sr-only">LOADING...</span>
-          <span aria-hidden="true">LOADING...</span>
-        </div>
-      </div>
-    );
+  if (loading) return <Skeleton className="w-full h-[80vh]" />;
+
   if (error)
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -382,67 +429,264 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
         </Card>
       </div>
     );
+
   if (!sessionData) return null;
 
   return (
     <>
+      {/* Dispute Modal */}
       <Dialog open={disputeModal} onOpenChange={setDisputeModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Report an Issue</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleDisputeSubmit} className="flex flex-col gap-4">
-            <label className="font-semibold">Why are you reporting this session?</label>
-            <textarea
-              className="input input-bordered"
-              value={disputeReason}
-              onChange={(e) => setDisputeReason(e.target.value)}
-              required
-              rows={4}
-            />
-            <label className="font-semibold">Bank Account Name</label>
-            <input
-              className="input input-bordered"
-              value={disputeBankName}
-              onChange={(e) => setDisputeBankName(e.target.value)}
-              required
-            />
-            <label className="font-semibold">Bank Account Number</label>
-            <input
-              className="input input-bordered"
-              value={disputeBankNumber}
-              onChange={(e) => setDisputeBankNumber(e.target.value)}
-              required
-            />
-            <label className="font-semibold">Bank Code</label>
-            <select
-              className="input input-bordered"
-              value={disputeBankCode}
-              onChange={(e) => setDisputeBankCode(e.target.value)}
-              required
-            >
-              <option value="" disabled>
-                Select a bank
-              </option>
-              {bankList.map((bank) => (
-                <option key={bank.code} value={bank.code}>
-                  {bank.name} ({bank.code})
-                </option>
-              ))}
-            </select>
-            <DialogFooter>
-              <Button type="submit" disabled={disputeSubmitting}>
-                {disputeSubmitting ? "Submitting..." : "Submit"}
-              </Button>
-              <DialogClose asChild>
-                <Button type="button" variant="outline">
-                  Cancel
+        <DialogContent className="max-w-lg mx-auto p-0 overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl">
+          {/* Header Section */}
+          <div className="bg-gradient-to-r from-red-500 to-red-600 px-8 py-6 text-white">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                Report an Issue
+              </DialogTitle>
+              <p className="text-red-100 text-sm mt-2 font-medium">
+                Help us resolve your concern quickly and efficiently
+              </p>
+            </DialogHeader>
+          </div>
+
+          {/* Form Section */}
+          <div className="px-8 py-6">
+            <form onSubmit={handleDisputeSubmit} className="space-y-6">
+              {/* Issue Description */}
+              <div className="space-y-3">
+                <Label htmlFor="dispute-reason" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  Describe the Issue
+                </Label>
+                <div className="relative">
+                  <textarea
+                    id="dispute-reason"
+                    className="w-full min-h-[120px] px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 shadow-sm"
+                    value={disputeReason}
+                    onChange={(e) => setDisputeReason(e.target.value)}
+                    required
+                    rows={4}
+                    placeholder="Please provide detailed information about the issue you experienced during this session..."
+                  />
+                  <div className="absolute bottom-3 right-3 text-xs text-gray-400">
+                    {disputeReason.length}/500
+                  </div>
+                </div>
+              </div>
+
+              {/* Price Amount */}
+              <div className="space-y-3">
+                <Label htmlFor="price-amount" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  Amount Paid
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="price-amount"
+                    type="text"
+                    value={disputePriceAmount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDisputePriceAmount(value);
+                      validatePriceAmount(value);
+                    }}
+                    className={`pl-4 pr-16 py-3 border-2 rounded-xl transition-all duration-200 shadow-sm ${
+                      priceAmountError 
+                        ? "border-red-500 focus:ring-red-500" 
+                        : "border-gray-200 dark:border-gray-600 focus:ring-red-500 focus:border-transparent"
+                    } bg-white dark:bg-gray-800`}
+                    placeholder="0.00"
+                    required
+                  />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-md">
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">birr</span>
+                  </div>
+                </div>
+                {priceAmountError && (
+                  <div className="flex items-center gap-2 text-sm text-red-600">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {priceAmountError}
+                  </div>
+                )}
+              </div>
+
+              {/* Bank Account Number */}
+              <div className="space-y-3">
+                <Label htmlFor="bank-number" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  Bank Account Number
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="bank-number"
+                    type="text"
+                    value={disputeBankNumber}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*$/.test(value) && value.length <= 13) {
+                        setDisputeBankNumber(value);
+                        validateBankNumber(value);
+                        if (showBankTooltip) {
+                          setShowBankTooltip(false);
+                        }
+                      } else if (!/^\d*$/.test(value)) {
+                        // Show error for invalid characters
+                        setBankNumberError("Letters and symbols are not allowed in this field");
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (!/\d/.test(e.key)) {
+                        e.preventDefault();
+                        setBankNumberError("Letters and symbols are not allowed in this field");
+                      }
+                      if (disputeBankNumber.length >= 13) {
+                        e.preventDefault();
+                        showBankInvalidTooltip();
+                      }
+                    }}
+                    className={bankNumberError ? "border-red-500" : ""}
+                    placeholder="Enter 13-digit account number"
+                    maxLength={13}
+                    required
+                  />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
+                    {disputeBankNumber.length}/13
+                  </div>
+                  {showBankTooltip && (
+                    <div className="absolute top-full left-0 mt-2 bg-red-500 text-white text-xs px-3 py-2 rounded-lg shadow-lg z-10 whitespace-nowrap">
+                      Maximum number allowed is 13 digits
+                      <div className="absolute -top-1 left-4 w-2 h-2 bg-red-500 rotate-45"></div>
+                    </div>
+                  )}
+                </div>
+                {bankNumberError && (
+                  <div className="flex items-center gap-2 text-sm text-red-600">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {bankNumberError}
+                  </div>
+                )}
+              </div>
+
+              {/* Bank Selection */}
+              <div className="space-y-3">
+                <Label htmlFor="bank-select" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  Select Your Bank
+                </Label>
+                <Select value={disputeBankCode} onValueChange={setDisputeBankCode} required>
+                  <SelectTrigger className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 shadow-sm bg-white dark:bg-gray-800">
+                    <SelectValue placeholder="Choose your bank from the list" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-2 shadow-xl">
+                    {bankList.map((bank) => (
+                      <SelectItem key={bank.code} value={bank.code} className="py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                        {bank.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Phone Number */}
+              <div className="space-y-3">
+                <Label htmlFor="phone-number" className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  Phone Number
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="phone-number"
+                    type="tel"
+                    value={disputePhoneNumber}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^[\d+]*$/.test(value)) {
+                        setDisputePhoneNumber(value);
+                        validatePhoneNumber(value);
+                        if (showPhoneTooltip) {
+                          setShowPhoneTooltip(false);
+                        }
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (!/[\d+]/.test(e.key)) {
+                        e.preventDefault();
+                        showPhoneInvalidTooltip();
+                      }
+                    }}
+                    className={`px-4 py-3 border-2 rounded-xl transition-all duration-200 shadow-sm ${
+                      phoneNumberError 
+                        ? "border-red-500 focus:ring-red-500" 
+                        : "border-gray-200 dark:border-gray-600 focus:ring-orange-500 focus:border-transparent"
+                    } bg-white dark:bg-gray-800`}
+                    placeholder="0912345678 or +251912345678"
+                    required
+                  />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </div>
+                  {showPhoneTooltip && (
+                    <div className="absolute top-full left-0 mt-2 bg-red-500 text-white text-xs px-3 py-2 rounded-lg shadow-lg z-10 whitespace-nowrap">
+                      Letters and symbols except + are not allowed in this field
+                      <div className="absolute -top-1 left-4 w-2 h-2 bg-red-500 rotate-45"></div>
+                    </div>
+                  )}
+                </div>
+                {phoneNumberError && (
+                  <div className="flex items-center gap-2 text-sm text-red-600">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {phoneNumberError}
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <DialogClose asChild>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="flex-1 py-3 px-6 border-2 border-gray-300 hover:border-gray-400 rounded-xl font-semibold transition-all duration-200 hover:shadow-md"
+                  >
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button 
+                  type="submit" 
+                  disabled={disputeSubmitting} 
+                  className="flex-1 py-3 px-6 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {disputeSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Submitting...
+                    </div>
+                  ) : (
+                    "Submit Report"
+                  )}
                 </Button>
-              </DialogClose>
-            </DialogFooter>
-          </form>
+              </div>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
+
       {/* Material Upload Modal */}
       <Dialog open={materialModal} onOpenChange={setMaterialModal}>
         <DialogContent>
@@ -478,6 +722,8 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Jitsi Script */}
       <Script
         src="https://meet.jit.si/external_api.js"
         strategy="afterInteractive"
@@ -489,8 +735,6 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
             sessionData &&
             session?.user
           ) {
-            console.log("✅ Jitsi API is ready, initializing");
-
             const api = new window.JitsiMeetExternalAPI("meet.jit.si", {
               roomName: `session-${sessionData._id}`,
               parentNode: jitsiRef.current,
@@ -506,13 +750,13 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
               },
             });
 
-            // Optional cleanup if needed
             window.addEventListener("beforeunload", () => api.dispose());
           }
           setJitsiLoading(false);
         }}
       />
 
+      {/* Main Content */}
       <div className="flex flex-col md:flex-row min-h-[80vh]">
         {/* Jitsi Video */}
         <div className="flex-1 bg-black flex items-center justify-center h-fit">
@@ -522,6 +766,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
             className={`w-full h-[400px] md:h-[80vh] ${jitsiLoading ? "hidden" : ""}`}
           />
         </div>
+
         {/* Info Panel */}
         <div className="w-full md:w-[400px] bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 flex flex-col justify-between">
           <Card className="m-6">
@@ -534,9 +779,6 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
               </div>
               <div>
                 <span className="font-semibold">Student:</span> {sessionData.studentName}
-                {studentEmail && (
-                  <span className="block text-xs text-gray-500">{studentEmail}</span>
-                )}
               </div>
               <div>
                 <span className="font-semibold">Date:</span>{" "}
@@ -548,6 +790,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
               <div>
                 <span className="font-semibold">Subject:</span> {sessionData.subject}
               </div>
+
               <Button
                 onClick={async () => {
                   // Mark session as completed (move to past)
@@ -556,7 +799,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ bookingId: sessionData._id }),
                   });
-                  if (isTutor) {
+                  if (session?.user?.role === "tutor") {
                     router.push("/tutor");
                   } else {
                     router.push("/student");
@@ -566,14 +809,17 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
               >
                 Leave Session
               </Button>
+
               {isTutor && (
                 <QuizCreationCard sessionId={sessionData._id} tutorId={sessionData.tutorId} />
               )}
+
               {isTutor && (
                 <Button onClick={() => setMaterialModal(true)} variant="secondary">
                   Upload Material
                 </Button>
               )}
+
               {isTutor && (
                 <div className="flex items-center gap-4 mt-4">
                   <span className="font-semibold">Mark Student as Present</span>
@@ -584,6 +830,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                   />
                 </div>
               )}
+
               {isStudent && !ratingSubmitted && (
                 <form className="flex flex-col gap-2 mt-4" onSubmit={handleRatingSubmit}>
                   <label className="font-semibold">Rate your session</label>
@@ -599,11 +846,12 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                   </Button>
                 </form>
               )}
+
               {isStudent && ratingSubmitted && (
                 <div className="text-green-600 text-sm mt-4">Thanks for your feedback!</div>
               )}
+
               {isStudent &&
-                // sessionHasEnded &&
                 (!sessionData.dispute || sessionData.dispute.filed === false) && (
                   <Button
                     variant="destructive"
@@ -613,11 +861,13 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                     Report an Issue
                   </Button>
                 )}
+
               {isStudent && sessionHasEnded && sessionData.dispute?.filed && (
                 <div className="text-yellow-600 text-sm mt-2">
                   Dispute already filed for this session.
                 </div>
               )}
+
               {/* Materials List */}
               {materials.length > 0 && (
                 <div className="mt-4">

@@ -549,7 +549,13 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                 <span className="font-semibold">Subject:</span> {sessionData.subject}
               </div>
               <Button
-                onClick={() => {
+                onClick={async () => {
+                  // Mark session as completed (move to past)
+                  await fetch("/api/bookings/complete", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ bookingId: sessionData._id }),
+                  });
                   if (isTutor) {
                     router.push("/tutor");
                   } else {

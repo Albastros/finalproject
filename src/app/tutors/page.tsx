@@ -292,6 +292,10 @@ export default function TutorsPage() {
   });
   const [tutors, setTutors] = useState<Tutor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 6;
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -310,11 +314,20 @@ export default function TutorsPage() {
       params.append("maxRate", filters.hourlyRate[1].toString());
     }
     if (filters.experience) params.append("experience", filters.experience.toString());
+    params.append("page", page.toString());
+    params.append("limit", limit.toString());
     setLoading(true);
     axios.get(`/api/tutors?${params.toString()}`).then((res) => {
       setTutors(res.data.tutors);
+      setTotalPages(res.data.totalPages || 1);
+      setTotal(res.data.total || 0);
       setLoading(false);
     });
+  }, [filters, page]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setPage(1);
   }, [filters]);
 
   return (
@@ -328,11 +341,33 @@ export default function TutorsPage() {
         ) : tutors.length === 0 ? (
           <div className="text-center py-12">No tutors found.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {tutors.map((tutor) => (
-              <TutorCard key={tutor._id} {...tutor} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {tutors.map((tutor) => (
+                <TutorCard key={tutor._id} {...tutor} />
+              ))}
+            </div>
+            {/* Pagination Controls */}
+            <div className="flex justify-center items-center gap-2 mt-10">
+              <Button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                variant="outline"
+              >
+                Previous
+              </Button>
+              <span className="px-3 text-gray-700 dark:text-gray-200">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                variant="outline"
+              >
+                Next
+              </Button>
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -12,7 +12,7 @@ const instructors = [
     experience: "8+ Years",
     rating: "4.9",
     students: "2.3K+",
-    img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&w=400&q=80",
+    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
   },
   {
     name: "Ms. Lily",
@@ -21,7 +21,7 @@ const instructors = [
     experience: "12+ Years",
     rating: "4.8",
     students: "3.1K+",
-    img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=facearea&w=400&q=80",
+    img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
   },
   {
     name: "Ms. Hana",
@@ -30,7 +30,7 @@ const instructors = [
     experience: "10+ Years",
     rating: "4.9",
     students: "1.8K+",
-    img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=facearea&w=400&q=80",
+    img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80",
   },
   {
     name: "Dr. Zeleke",
@@ -39,7 +39,7 @@ const instructors = [
     experience: "15+ Years",
     rating: "4.7",
     students: "2.7K+",
-    img: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=facearea&w=400&q=80",
+    img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
   },
 ];
 

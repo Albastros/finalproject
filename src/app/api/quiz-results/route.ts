@@ -45,6 +45,7 @@ export async function GET(req: NextRequest) {
   if (!studentId || !quizId) {
     return NextResponse.json({ error: "Missing studentId or quizId" }, { status: 400 });
   }
-  const result = await QuizResult.findOne({ studentId, quizId });
-  return NextResponse.json({ result });
+  // Return the most recent attempt
+  const result = await QuizResult.find({ studentId, quizId }).sort({ createdAt: -1 }).limit(1);
+  return NextResponse.json({ result: result[0] });
 }

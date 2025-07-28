@@ -466,7 +466,7 @@ export default function ProfileView({ user }: { user: any }) {
             <div className="text-sm mt-2 text-center max-w-md">{user?.bio}</div>
           )}
           <div className="flex gap-2 mt-4">
-            {user?.role !== "admin" && user?.role !== "etn" && (
+            {user?.role === "user" && (
               <Link href="/start-tutoring">
                 <button className="px-4 py-2 rounded border text-sm font-medium">
                   Start Tutoring

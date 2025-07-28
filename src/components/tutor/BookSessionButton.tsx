@@ -217,41 +217,51 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
       router.push("/login");
       return;
     }
-    if (!startDate || !selectedSlot || !subject) {
-      setAvailabilityError("All fields except message are required.");
+    if (!startDate || selectedSlots.length === 0 || !subject) {
+      setAvailabilityError("Please select at least one time slot and fill all required fields.");
       return;
     }
+    
     setLoading(true);
     try {
-      let [weekday, timeRaw] = selectedSlot.split(":");
-      let time = timeRaw.length === 2 ? timeRaw.padStart(2, "0") + ":00" : timeRaw;
+      // Extract weekdays and times from selected slots
+      const weekdays = selectedSlots.map(slot => slot.split(":")[0]);
+      const time = selectedSlots[0].split(":")[1]; // Use first selected time
+      
       // 1. Create recurring sessions
       const res = await axios.post("/api/bookings/recurring", {
         tutorId: tutor._id,
         studentId: session.user.id,
         startDate,
-        durationInMonths: duration,
-        weekday,
+        durationInMonths: recurringDuration,
+        weekdays,
         time,
         subject,
         message,
       });
-      const { tutorName, firstSessionDate, sessions } = res.data;
+      
+      const { tutorName, firstSessionDate, sessions, totalSessions, totalPayment } = res.data;
+      
       if (!sessions || !sessions.length) throw new Error("No sessions created");
-      // 2. Calculate total price
-      const totalAmount = (tutor.price ?? price) * sessions.length;
-      // 3. Create payment record
+      
+      // Show success message with details
+      toast.success(
+        `Successfully scheduled ${totalSessions} recurring sessions! Total cost: ${totalPayment} ETB`
+      );
+      
+      // 2. Create payment record
       const tx_ref = `recurring-${sessions[0]._id}-${Date.now()}`;
       await axios.post("/api/payments", {
-        bookingId: sessions[0]._id, // Use first session as reference
+        bookingId: sessions[0]._id,
         studentId: session.user.id,
         tutorId: tutor._id,
-        amount: totalAmount,
+        amount: totalPayment,
         tx_ref,
       });
-      // 4. Initiate payment (Chapa)
+      
+      // 3. Initiate payment
       const paymentInitRes = await axios.post("/api/payments/init", {
-        amount: totalAmount,
+        amount: totalPayment,
         email: session.user.email,
         first_name: session.user.name?.split(" ")[0] || "Student",
         last_name: session.user.name?.split(" ").slice(1).join(" ") || "",
@@ -259,9 +269,12 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
         callback_url: `${window.location.origin}/api/webhook/chapa`,
         return_url: `${window.location.origin}/payment-status?booking=${sessions[0]._id}`,
       });
+      
       window.location.href = paymentInitRes.data.checkout_url;
-    } catch (err) {
-      alert("Failed to book recurring sessions or start payment. Please try again.");
+    } catch (err: any) {
+      console.error("Recurring booking error:", err);
+      const errorMsg = err.response?.data?.error || "Failed to book recurring sessions. Please try again.";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
       setOpen(false);

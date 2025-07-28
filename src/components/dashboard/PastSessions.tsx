@@ -159,18 +159,22 @@ export function PastSessions() {
   return (
     <>
       <Dialog open={disputeModal.open} onOpenChange={(open) => setDisputeModal({ open })}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Report an Issue</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleDisputeSubmit} className="flex flex-col gap-4">
             <label className="font-semibold">Why are you reporting this session?</label>
             <textarea
-              className="input input-bordered"
+              className="input input-bordered min-h-[120px] resize-y"
               value={disputeReason}
               onChange={(e) => setDisputeReason(e.target.value)}
               required
               rows={4}
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#9CA3AF #F3F4F6'
+              }}
             />
             <DialogFooter>
               <Button type="submit" disabled={disputeSubmitting}>

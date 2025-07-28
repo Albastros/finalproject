@@ -300,7 +300,10 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md w-full">
+        <DialogContent className="sm:max-w-md w-full max-h-[80vh] overflow-y-auto" style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#9CA3AF #F3F4F6'
+        }}>
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-center">📅 Book Session</DialogTitle>
           </DialogHeader>

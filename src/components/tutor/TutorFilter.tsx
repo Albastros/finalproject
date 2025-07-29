@@ -21,10 +21,6 @@ const subjects = [
   "Computer Science",
 ];
 const languages = ["English", "Amharic"];
-const availabilityOptions = [
-  { value: "available", label: "Available" },
-  { value: "unavailable", label: "Unavailable" },
-];
 const genders = ["Male", "Female"];
 const tutoringTypes = [
   { value: "in-person", label: "In Person" },
@@ -35,7 +31,6 @@ const tutoringTypes = [
 const initialFilters = {
   keyword: "",
   subject: "none",
-  availability: "none",
   language: "none",
   gender: "none",
   tutoringType: "none",
@@ -119,30 +114,6 @@ export function TutorFilter({ onFilterChange }: TutorFilterProps) {
             {subjects.map((s) => (
               <SelectItem key={s} value={s} className="rounded-lg hover:bg-blue-50">
                 {s}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </motion.div>
-      {/* Availability Filter */}
-      <motion.div 
-        className="space-y-3"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-green-500" />
-          <span className="font-semibold text-gray-800">Availability</span>
-        </div>
-        <Select value={filters.availability} onValueChange={(v) => handleChange("availability", v)}>
-          <SelectTrigger className="w-full h-12 border-2 border-slate-200 hover:border-green-300 rounded-xl bg-white/80 backdrop-blur-sm transition-all duration-300">
-            <SelectValue placeholder="Select availability" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-2 border-slate-200 bg-white/95 backdrop-blur-sm">
-            {availabilityOptions.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value} className="rounded-lg hover:bg-green-50">
-                {opt.label}
               </SelectItem>
             ))}
           </SelectContent>

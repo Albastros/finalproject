@@ -19,7 +19,7 @@ const instructors = [
     designation: "Computer Science Expert",
     specialization: "Programming & AI",
     experience: "12+ Years",
-    rating: "4.8",
+    // rating: "4.8",
     students: "3.1K+",
     img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
   },
@@ -61,7 +61,7 @@ const cardVariants = {
     opacity: 1,
     scale: 1,
     transition: {
-      type: "spring",
+      type: 'spring' as const,
       stiffness: 100,
       damping: 15,
       duration: 0.6

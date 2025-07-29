@@ -255,7 +255,7 @@ export default function HeroSection() {
               {[
                 { icon: Users, value: "10K+", label: "Students", color: "cyan" },
                 { icon: BookOpen, value: "500+", label: "Courses", color: "blue" },
-                { icon: Star, value: "4.8", label: "Rating", color: "yellow" }
+                // { icon: Star, value: "4.8", label: "Rating", color: "yellow" }
               ].map((stat, index) => (
                 <motion.div
                   key={stat.label}

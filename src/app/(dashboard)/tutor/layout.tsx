@@ -86,7 +86,7 @@ export default function TutorLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
         {/* Navigation */}
-        <div className="p-4 space-y-2">
+        <div className="p-4 space-y-2 pb-24">
           {sidebarLinks.map((link) => {
             const isActive = pathname === link.href;
             const Icon = link.icon;

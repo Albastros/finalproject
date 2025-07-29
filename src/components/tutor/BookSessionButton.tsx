@@ -152,11 +152,14 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
     try {
       const [day, time] = selectedSlot.split(":");
 
+      // Calculate total price for Chapa and payment record
+      const calculatedTotal = price * duration * 4;
+
       // Create single booking
       const bookingResponse = await axios.post("/api/bookings", {
         tutorId: tutor._id,
         studentId: session.user.id,
-        price,
+        price: calculatedTotal,
         sessionDate,
         sessionTime: time,
         subject,
@@ -174,13 +177,13 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
         bookingId: booking._id,
         studentId: session.user.id,
         tutorId: tutor._id,
-        amount: price,
+        amount: calculatedTotal,
         tx_ref,
       });
 
       // Initialize payment
       const paymentInitRes = await axios.post("/api/payments/init", {
-        amount: price,
+        amount: calculatedTotal,
         email: session.user.email,
         first_name: session.user.name?.split(" ")[0] || "Student",
         last_name: session.user.name?.split(" ").slice(1).join(" ") || "",
@@ -463,7 +466,7 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
                   Processing...
                 </span>
               ) : (
-                `Book ${sessionType} Session - ${price} birr`
+                `Book ${sessionType} Session - ${price * duration * 4} birr`
               )}
             </Button>
           </form>

@@ -228,16 +228,7 @@ function TutorCard({ _id, image, name, subjects, experience, bio, availabilitySt
           {bio || "Passionate educator ready to help you achieve your learning goals."}
         </div>
         
-        {/* Availability Status Badge */}
-        <div className="flex items-center justify-center mt-2">
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            availabilityStatus === 'unavailable' 
-              ? 'bg-red-100 text-red-800 border border-red-200' 
-              : 'bg-green-100 text-green-800 border border-green-200'
-          }`}>
-            {availabilityStatus === 'unavailable' ? 'Fully Booked' : 'Available'}
-          </span>
-        </div>
+        {/* Availability Status Badge removed as requested */}
         
         {/* Button */}
         <Button className={`mt-4 w-full h-11 font-semibold text-white bg-gradient-to-r ${colors.accent} hover:shadow-lg transition-all duration-300 rounded-xl shadow-md`} asChild>

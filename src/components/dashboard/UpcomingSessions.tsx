@@ -133,11 +133,7 @@ export function UpcomingSessions() {
             </CardTitle>
             {/* Tutor rating (if available) */}
             {/* <TutorRatingDisplay tutorId={session.tutorId} /> */}
-            <div className="mt-2 flex gap-2 items-center">
-              <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><polygon points="10,1 12,7 18,7 13,11 15,17 10,13 5,17 7,11 2,7 8,7" /></svg>
-              <span className="text-xs text-gray-500">4.8</span>
-              <svg className="w-4 h-4 text-pink-400 ml-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18l-1.45-1.32C4.4 12.36 2 9.28 2 6.5 2 4.42 3.42 3 5.5 3c1.54 0 3.04.99 3.57 2.36h1.87C11.46 3.99 12.96 3 14.5 3 16.58 3 18 4.42 18 6.5c0 2.78-2.4 5.86-6.55 10.18L10 18z" /></svg>
-            </div>
+            {/* Rating removed as requested */}
             <div className="text-sm text-purple-700 font-medium mt-2 flex items-center gap-2">
               <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M6 2a1 1 0 00-1 1v2a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1H6zm8 6H6a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V9a1 1 0 00-1-1z" /></svg>
               {session.subject}

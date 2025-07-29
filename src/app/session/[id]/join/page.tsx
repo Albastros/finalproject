@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/hooks/use-session";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, NotebookPen, User, User2 } from "lucide-react";
 import { format, parseISO, addMinutes } from "date-fns";
 import Script from "next/script";
 import { Switch } from "@/components/ui/switch";
@@ -102,8 +104,10 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
   // Other state
   const [studentEmail, setStudentEmail] = useState<string | null>(null);
 
-  const isTutor = (session?.user as any)?.role === "tutor";
-  const isStudent = (session?.user as any)?.role === "user";
+  // Type assertion to allow role property (if your session user does not have role, adjust accordingly)
+  type SessionUserWithRole = (typeof session extends { user: infer U } ? U : unknown) & { role?: string };
+  const isTutor = ((session?.user as SessionUserWithRole)?.role === "tutor");
+  const isStudent = ((session?.user as SessionUserWithRole)?.role === "user");
 
   // Calculate session timing
   const now = new Date();
@@ -419,7 +423,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
           <CardContent>
             <div className="mb-4 text-red-600">{error}</div>
             <Button onClick={() => {
-              if (session?.user?.role === "tutor") {
+              if ((session?.user as SessionUserWithRole)?.role === "tutor") {
                 router.push("/tutor");
               } else {
                 router.push("/student");
@@ -767,27 +771,36 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
         </div>
 
         {/* Info Panel */}
-        <div className="w-full md:w-[400px] bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 flex flex-col justify-between">
-          <Card className="m-6">
+        <div className="w-full md:w-[400px] bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-slate-900 border-l border-blue-100 dark:border-gray-800 flex flex-col justify-between min-h-full transition-all duration-500">
+          <Card className="m-6 rounded-2xl shadow-xl border-2 border-blue-100 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 backdrop-blur-md">
             <CardHeader>
-              <CardTitle>Session Info</CardTitle>
+              <CardTitle className="text-xl font-bold text-blue-700 dark:text-blue-300 tracking-tight">Session Info</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <div>
-                <span className="font-semibold">Tutor:</span> {sessionData.tutorName}
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-blue-400" />
+                <span className="font-semibold">Tutor:</span>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full">{sessionData.tutorName}</Badge>
               </div>
-              <div>
-                <span className="font-semibold">Student:</span> {sessionData.studentName}
+              <div className="flex items-center gap-2">
+                <User2 className="w-4 h-4 text-green-400" />
+                <span className="font-semibold">Student:</span>
+                <Badge variant="outline" className="bg-green-50 text-green-700 px-2 py-1 rounded-full">{sessionData.studentName}</Badge>
               </div>
-              <div>
-                <span className="font-semibold">Date:</span>{" "}
-                {format(parseISO(sessionData.sessionDate), "MMM d, yyyy")}
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-indigo-400" />
+                <span className="font-semibold">Date:</span>
+                <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full">{format(parseISO(sessionData.sessionDate), "MMM d, yyyy")}</Badge>
               </div>
-              <div>
-                <span className="font-semibold">Time:</span> {sessionData.sessionTime}
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-pink-400" />
+                <span className="font-semibold">Time:</span>
+                <Badge variant="secondary" className="bg-pink-50 text-pink-700 px-2 py-1 rounded-full">{sessionData.sessionTime}</Badge>
               </div>
-              <div>
-                <span className="font-semibold">Subject:</span> {sessionData.subject}
+              <div className="flex items-center gap-2">
+                <NotebookPen className="w-4 h-4 text-orange-400" />
+                <span className="font-semibold">Subject:</span>
+                <Badge variant="secondary" className="bg-orange-50 text-orange-700 px-2 py-1 rounded-full">{sessionData.subject}</Badge>
               </div>
 
               <Button
@@ -798,13 +811,14 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ bookingId: sessionData._id }),
                   });
-                  if (session?.user?.role === "tutor") {
+                  if ((session?.user as SessionUserWithRole)?.role === "tutor") {
                     router.push("/tutor");
                   } else {
                     router.push("/student");
                   }
                 }}
                 variant="destructive"
+                className="w-full py-3 mt-2 rounded-xl font-semibold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transition-all duration-200"
               >
                 Leave Session
               </Button>
@@ -814,7 +828,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
               )}
 
               {isTutor && (
-                <Button onClick={() => setMaterialModal(true)} variant="secondary">
+                <Button onClick={() => setMaterialModal(true)} variant="secondary" className="w-full py-3 mt-2 rounded-xl font-semibold bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white shadow-md transition-all duration-200">
                   Upload Material
                 </Button>
               )}
@@ -835,12 +849,12 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                   <label className="font-semibold">Rate your session</label>
                   <StarRating value={rating} onChange={setRating} disabled={ratingSubmitted} />
                   <textarea
-                    className="input input-bordered"
+                    className="input input-bordered rounded-xl border-2 border-blue-100 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-200 px-3 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm"
                     placeholder="Leave a comment..."
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                   />
-                  <Button type="submit" className="w-fit">
+                  <Button type="submit" className="w-fit bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-semibold rounded-xl shadow-md transition-all duration-200">
                     Submit Rating
                   </Button>
                 </form>
@@ -854,7 +868,7 @@ export default function JoinSessionPage({ params }: { params: { id: string } }) 
                 (!sessionData.dispute || sessionData.dispute.filed === false) && (
                   <Button
                     variant="destructive"
-                    className="w-full"
+                    className="w-full py-3 mt-2 rounded-xl font-semibold bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white shadow-md transition-all duration-200"
                     onClick={() => setDisputeModal(true)}
                   >
                     Report an Issue

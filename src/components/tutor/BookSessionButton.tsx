@@ -289,7 +289,10 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
   return (
     <>
       {canBookIndividual && (
-        <Button className="mt-4 w-full font-semibold shadow mb-0" onClick={() => setOpen(true)}>
+        <Button
+          className="mt-4 w-full font-semibold shadow-lg mb-0 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl transition-all duration-200 hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          onClick={() => setOpen(true)}
+        >
           Book a session for {price} birr
         </Button>
       )}
@@ -310,7 +313,7 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
       )}
       {canBookGroup && (
         <Button
-          className="mt-4 w-full font-semibold shadow bg-blue-600 hover:bg-blue-700"
+          className="mt-4 w-full font-semibold shadow-lg mb-0 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl transition-all duration-200 hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
           onClick={() => {
             setSessionType("group");
             setOpen(true);
@@ -321,16 +324,19 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md w-full max-h-[80vh] overflow-y-auto" style={{
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#9CA3AF #F3F4F6'
-        }}>
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-center">📅 Book Session</DialogTitle>
+        <DialogContent
+          className="sm:max-w-lg w-full max-h-[85vh] overflow-y-auto p-0 border-0 shadow-2xl rounded-2xl bg-gradient-to-br from-white via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 backdrop-blur-xl"
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#9CA3AF #F3F4F6' }}
+        >
+          <DialogHeader className="px-8 pt-8 pb-2">
+            <DialogTitle className="text-2xl font-extrabold text-center tracking-tight drop-shadow-md flex items-center justify-center gap-2">
+              <span role="img" aria-label="calendar" className="text-blue-600 dark:text-blue-300">📅</span>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Book a Session</span>
+            </DialogTitle>
           </DialogHeader>
           {/* Show explanation if user cannot book individual or group session */}
           {!canBookIndividual && (
-            <div className="mb-2 p-2 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded text-center text-sm">
+            <div className="mb-4 mx-8 p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl text-center text-sm font-medium shadow-sm">
               {hasIndividualBooking
                 ? "This tutor is already booked for an individual session at the selected time."
                 : hasGroupBooking
@@ -338,30 +344,32 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
                 : null}
             </div>
           )}
-          {/* Optionally, add more explanations for group session full, etc. */}
-          <form onSubmit={handleBook} className="space-y-4 mt-4">
+          <form onSubmit={handleBook} className="flex flex-col gap-6 px-8 pb-8 pt-2">
             {canBookIndividual && (
-              <div>
-                <label className="block text-sm font-medium mb-1">Session Type</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={sessionType}
-                  onChange={(e) => setSessionType(e.target.value as "individual" | "group")}
-                >
-                  <option value="individual">Individual Session</option>
-                  <option value="group">Group Session</option>
-                </select>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-semibold mb-1 text-blue-900 dark:text-blue-200">Session Type</label>
+                <div className="relative group">
+                  <select
+                    className="w-full px-4 py-3 border-2 border-blue-200 dark:border-blue-800 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 font-semibold shadow-lg appearance-none pr-12 text-blue-900 dark:text-blue-100"
+                    value={sessionType}
+                    onChange={(e) => setSessionType(e.target.value as 'individual' | 'group')}
+                  >
+                    <option value="individual" className="font-bold">Individual Session</option>
+                    <option value="group" className="font-bold">Group Session</option>
+                  </select>
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 transition-transform duration-300 group-focus-within:rotate-180">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  </span>
+                </div>
               </div>
             )}
-            {canBookGroup && (
-              <input type="hidden" value="group" />
-            )}
+            {canBookGroup && <input type="hidden" value="group" />}
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Session Date</label>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-semibold mb-1 text-blue-900 dark:text-blue-200">Session Date</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border-2 border-blue-200 dark:border-blue-800 rounded-xl bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 font-medium shadow-sm"
                 value={sessionDate}
                 onChange={(e) => setSessionDate(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
@@ -369,57 +377,67 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Available Time Slots</label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={selectedSlot}
-                onChange={(e) => setSelectedSlot(e.target.value)}
-                required
-              >
-                <option value="">Select a time slot</option>
-                {availableSlots.map((slot) => (
-                  <option key={slot.value} value={slot.value}>
-                    {slot.label}
-                  </option>
-                ))}
-              </select>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-semibold mb-1 text-blue-900 dark:text-blue-200">Available Time Slots</label>
+              <div className="relative group">
+                <select
+                  className="w-full px-4 py-3 border-2 border-blue-200 dark:border-blue-800 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 font-semibold shadow-lg appearance-none pr-12 text-blue-900 dark:text-blue-100"
+                  value={selectedSlot}
+                  onChange={(e) => setSelectedSlot(e.target.value)}
+                  required
+                >
+                  <option value="" className="font-bold text-gray-400">Select a time slot</option>
+                  {availableSlots.map((slot) => (
+                    <option key={slot.value} value={slot.value} className={selectedSlot === slot.value ? 'font-bold text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900' : ''}>
+                      {slot.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 transition-transform duration-300 group-focus-within:rotate-180">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </span>
+              </div>
               {availableSlots.length === 0 && (
-                <p className="text-sm text-gray-500 mt-1">No availability set by tutor</p>
+                <p className="text-xs text-gray-500 mt-1">No availability set by tutor</p>
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Subject</label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                required
-              >
-                <option value="">Select a subject</option>
-                {tutor.subjects?.map((subj) => (
-                  <option key={subj} value={subj}>
-                    {subj}
-                  </option>
-                ))}
-              </select>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-semibold mb-1 text-blue-900 dark:text-blue-200">Subject</label>
+              <div className="relative group">
+                <select
+                  className="w-full px-4 py-3 border-2 border-blue-200 dark:border-blue-800 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 font-semibold shadow-lg appearance-none pr-12 text-blue-900 dark:text-blue-100"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  required
+                >
+                  <option value="" className="font-bold text-gray-400">Select a subject</option>
+                  {tutor.subjects?.map((subj) => (
+                    <option key={subj} value={subj} className={subject === subj ? 'font-bold text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900' : ''}>
+                      {subj}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 transition-transform duration-300 group-focus-within:rotate-180">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </span>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Message (Optional)</label>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-semibold mb-1 text-blue-900 dark:text-blue-200">Message <span className="font-normal text-gray-400">(Optional)</span></label>
               <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+                className="w-full px-4 py-3 border-2 border-blue-200 dark:border-blue-800 rounded-xl bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 font-medium shadow-sm h-24 resize-none"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Any special requirements or notes..."
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Duration (Months)</label>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-semibold mb-1 text-blue-900 dark:text-blue-200">Duration <span className="font-normal text-gray-400">(Months)</span></label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border-2 border-blue-200 dark:border-blue-800 rounded-xl bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 font-medium shadow-sm"
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
               >
@@ -431,8 +449,22 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
               </select>
             </div>
 
-            <Button type="submit" disabled={loading || !selectedSlot} className="w-full">
-              {loading ? "Processing..." : `Book ${sessionType} Session - ${price} birr`}
+            <Button
+              type="submit"
+              disabled={loading || !selectedSlot}
+              className="w-full font-bold shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl transition-all duration-200 hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-blue-400 focus:outline-none py-3 text-lg tracking-tight disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                `Book ${sessionType} Session - ${price} birr`
+              )}
             </Button>
           </form>
         </DialogContent>
@@ -441,20 +473,4 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
   );
 }
 
-const handleSlotChange = (slotValue: string, checked: boolean) => {
-  let newSelectedSlots;
-  if (checked) {
-    newSelectedSlots = [...selectedSlots, slotValue];
-  } else {
-    newSelectedSlots = selectedSlots.filter((slot) => slot !== slotValue);
-  }
 
-  setSelectedSlots(newSelectedSlots);
-  setTotalPrice(price * newSelectedSlots.length);
-
-  // Set session time from first selected slot for backward compatibility
-  if (newSelectedSlots.length > 0) {
-    const [, time] = newSelectedSlots[0].split(":");
-    setSessionTime(time);
-  }
-};

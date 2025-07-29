@@ -52,8 +52,13 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
   const [totalPrice, setTotalPrice] = useState(price);
   const toastShownRef = useRef(false);
 
-  const canBookIndividual = !tutorBookingStatus.hasIndividualBooking;
-  const canBookGroup = true; // Always allow group booking
+  // Group + individual not allowed, group + group allowed
+  // If group session exists, allow only group booking, not individual
+  // If individual session exists, allow neither
+  const hasGroupBooking = tutorBookingStatus.hasGroupBooking;
+  const hasIndividualBooking = tutorBookingStatus.hasIndividualBooking;
+  const canBookIndividual = !hasIndividualBooking && !hasGroupBooking;
+  const canBookGroup = hasGroupBooking && !hasIndividualBooking;
   const hasActiveGroupSessions = tutorBookingStatus.groupBookings.length > 0;
 
   useEffect(() => {
@@ -85,7 +90,7 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
   useEffect(() => {
     if (open && !canBookIndividual && !toastShownRef.current) {
       toast.error(
-        "This tutor is already booked for an individual session at the selected time. You can only join a group session if available."
+        "This tutor is already booked for an individual session at the selected time."
       );
       toastShownRef.current = true;
     }
@@ -283,33 +288,36 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
 
   return (
     <>
-      {canBookIndividual ? (
+      {canBookIndividual && (
         <Button className="mt-4 w-full font-semibold shadow mb-0" onClick={() => setOpen(true)}>
           Book a session for {price} birr
         </Button>
-      ) : (
+      )}
+      {hasIndividualBooking && (
         <div className="mt-4 space-y-2">
           <div className="w-full bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded text-center font-semibold">
             Individual Session - BOOKED
             {tutorBookingStatus.individualBooking && (
               <div className="text-xs mt-1">
-                Date: {tutorBookingStatus.individualBooking.sessionDate} at{" "}
-                {tutorBookingStatus.individualBooking.sessionTime}
+                Date: {tutorBookingStatus.individualBooking.sessionDate}
+                {tutorBookingStatus.individualBooking.sessionTime && tutorBookingStatus.individualBooking.sessionTime !== "00" && (
+                  <> at {tutorBookingStatus.individualBooking.sessionTime}</>
+                )}
               </div>
             )}
           </div>
-          {canBookGroup && (
-            <Button
-              className="w-full font-semibold shadow bg-blue-600 hover:bg-blue-700"
-              onClick={() => {
-                setSessionType("group");
-                setOpen(true);
-              }}
-            >
-              Book Group Session for {price} birr
-            </Button>
-          )}
         </div>
+      )}
+      {canBookGroup && (
+        <Button
+          className="mt-4 w-full font-semibold shadow bg-blue-600 hover:bg-blue-700"
+          onClick={() => {
+            setSessionType("group");
+            setOpen(true);
+          }}
+        >
+          Book Group Session for {price} birr
+        </Button>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -323,8 +331,11 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
           {/* Show explanation if user cannot book individual or group session */}
           {!canBookIndividual && (
             <div className="mb-2 p-2 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded text-center text-sm">
-              This tutor is already booked for an individual session at the selected time. You can
-              only join a group session if available.
+              {hasIndividualBooking
+                ? "This tutor is already booked for an individual session at the selected time."
+                : hasGroupBooking
+                ? "This tutor is already booked for a group session at the selected time. Only group bookings are allowed."
+                : null}
             </div>
           )}
           {/* Optionally, add more explanations for group session full, etc. */}
@@ -341,6 +352,9 @@ export default function BookSessionButton({ tutor, price }: { tutor: Tutor; pric
                   <option value="group">Group Session</option>
                 </select>
               </div>
+            )}
+            {canBookGroup && (
+              <input type="hidden" value="group" />
             )}
 
             <div>

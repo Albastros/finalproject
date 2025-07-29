@@ -45,65 +45,40 @@ function SidebarFilters({ filters, setFilters }: SidebarFiltersProps) {
     <aside className="w-64 p-4 border-r bg-muted/50">
       <div className="mb-4">
         <div className="font-semibold mb-2">Subjects</div>
-        {SUBJECTS.map((subject) => (
-          <label key={subject} className="flex items-center gap-2 mb-1">
-            <input
-              type="checkbox"
-              checked={filters.subjects.includes(subject)}
-              onChange={() => {
-                setFilters((f) => ({
-                  ...f,
-                  subjects: f.subjects.includes(subject)
-                    ? f.subjects.filter((s) => s !== subject)
-                    : [...f.subjects, subject],
-                }));
-              }}
-            />
-            {subject}
-          </label>
-        ))}
+        <select
+          className="w-full p-2 rounded border"
+          value={filters.subject}
+          onChange={e => setFilters(f => ({ ...f, subject: e.target.value }))}
+        >
+          <option value="">All Subjects</option>
+          {SUBJECTS.map(subject => (
+            <option key={subject} value={subject}>{subject}</option>
+          ))}
+        </select>
       </div>
       <div className="mb-4">
         <div className="font-semibold mb-2">Languages</div>
-        {LANGUAGES.map((lang) => (
-          <label key={lang} className="flex items-center gap-2 mb-1">
-            <input
-              type="checkbox"
-              checked={filters.languages.includes(lang)}
-              onChange={() => {
-                setFilters((f) => ({
-                  ...f,
-                  languages: f.languages.includes(lang)
-                    ? f.languages.filter((l) => l !== lang)
-                    : [...f.languages, lang],
-                }));
-              }}
-            />
-            {lang}
-          </label>
-        ))}
+        <select
+          className="w-full p-2 rounded border"
+          value={filters.language}
+          onChange={e => setFilters(f => ({ ...f, language: e.target.value }))}
+        >
+          <option value="">All Languages</option>
+          {LANGUAGES.map(lang => (
+            <option key={lang} value={lang}>{lang}</option>
+          ))}
+        </select>
       </div>
       <div className="mb-4">
-        <div className="font-semibold mb-2">Experience</div>
-        <div className="flex gap-2 items-center">
-          <Input
-            type="number"
-            min={0}
-            placeholder="Min"
-            value={filters.minExperience}
-            onChange={(e) => setFilters((f) => ({ ...f, minExperience: e.target.value }))}
-            className="w-16"
-          />
-          <span>-</span>
-          <Input
-            type="number"
-            min={0}
-            placeholder="Max"
-            value={filters.maxExperience}
-            onChange={(e) => setFilters((f) => ({ ...f, maxExperience: e.target.value }))}
-            className="w-16"
-          />
-        </div>
+        <div className="font-semibold mb-2">Experience (years)</div>
+        <Input
+          type="number"
+          min={0}
+          placeholder="Experience"
+          value={filters.experience}
+          onChange={e => setFilters(f => ({ ...f, experience: Number(e.target.value) }))}
+          className="w-full"
+        />
       </div>
     </aside>
   );
@@ -184,7 +159,7 @@ function TutorCard({ _id, image, name, subjects, experience, bio, availabilitySt
   const colors = cardColors[colorIndex];
   
   return (
-    <Card className={`relative flex flex-col h-full overflow-hidden ${colors.bg} shadow-xl hover:shadow-2xl transition-all duration-700 group hover:scale-[1.05] hover:-translate-y-3 rounded-3xl border-2 ${colors.border} backdrop-blur-sm`}>
+    <Card className={`relative flex flex-col min-h-[520px] h-full overflow-hidden ${colors.bg} shadow-xl hover:shadow-2xl transition-all duration-700 group hover:scale-[1.05] hover:-translate-y-3 rounded-3xl border-2 ${colors.border} backdrop-blur-sm w-full max-w-[480px] mx-auto`}>
       {/* Ultra Enhanced Header with complex patterns */}
       <div className={`h-24 ${colors.header} relative overflow-hidden`}>
         <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/5 to-white/20 animate-pulse" />
@@ -342,7 +317,7 @@ export default function TutorsPage() {
           <div className="text-center py-12">No tutors found.</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-10 justify-center" style={{gridAutoColumns:'minmax(340px, 1fr)'}}>
               {tutors.map((tutor) => (
                 <TutorCard key={tutor._id} {...tutor} />
               ))}

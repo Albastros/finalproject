@@ -86,19 +86,22 @@ export default function TutorQuizzesPage() {
               <CardTitle>Quizzes</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-8 md:grid-cols-2">
                 {quizzes.map((quiz) => (
-                  <Card key={quiz._id} className="flex flex-col gap-2 p-4">
-                    <div className="font-medium text-base truncate" title={quiz.title}>
+                  <Card
+                    key={quiz._id}
+                    className="relative flex flex-col gap-4 p-6 rounded-3xl shadow-2xl border border-indigo-200/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl transition-all duration-500 hover:scale-[1.03] hover:shadow-indigo-300/40 group"
+                    style={{ boxShadow: '0 4px 24px 0 rgba(112, 80, 255, 0.10)' }}
+                  >
+                    {/* Decorative gradient accent */}
+                    <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 opacity-30 rounded-full blur-xl group-hover:opacity-50 transition-all duration-500" />
+                    <div className="font-bold text-lg truncate text-indigo-700 group-hover:text-purple-700 transition-colors duration-300" title={quiz.title}>
                       {quiz.title}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {quiz.subject && <span>Subject: {quiz.subject} | </span>}
-                      {quiz.sessionDate} {quiz.sessionTime}
+                    <div className="flex flex-wrap gap-2 text-xs font-medium text-gray-500 mt-1">
+                      {quiz.subject && <span className="px-2 py-1 rounded-lg bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 text-blue-700 shadow">Subject: {quiz.subject}</span>}
+                      <span className="px-2 py-1 rounded-lg bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-100 text-purple-700 shadow">{quiz.sessionDate} {quiz.sessionTime}</span>
                     </div>
-                    <Button asChild size="sm" variant="outline" className="mt-2 w-fit">
-                      {/* <a href={`/quiz/${quiz._id}`}>View/Edit</a> */}
-                    </Button>
                   </Card>
                 ))}
               </div>
@@ -111,66 +114,88 @@ export default function TutorQuizzesPage() {
               <CardTitle>Quiz Results</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-4">
-                <label className="block font-medium mb-2">Select a quiz:</label>
-                <select
-                  className="w-full border rounded px-3 py-2"
-                  value={selectedQuizId || ""}
-                  onChange={(e) => handleSelectQuiz(e.target.value)}
-                >
-                  <option value="">-- Select Quiz --</option>
-                  {quizzes.map((quiz) => (
-                    <option key={quiz._id} value={quiz._id}>
-                      {quiz.title}
-                    </option>
-                  ))}
-                </select>
+              <div className="mb-6">
+                <label className="block font-bold text-lg text-indigo-700 mb-2">Select a quiz:</label>
+                <div className="relative">
+                  <select
+                    className="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 text-indigo-700 font-semibold shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300"
+                    value={selectedQuizId || ""}
+                    onChange={(e) => handleSelectQuiz(e.target.value)}
+                  >
+                    <option value="">-- Select Quiz --</option>
+                    {quizzes.map((quiz) => (
+                      <option key={quiz._id} value={quiz._id}>
+                        {quiz.title}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-indigo-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </span>
+                </div>
               </div>
               {resultsLoading ? (
-                <div>Loading results...</div>
+                <div className="py-8 text-center text-indigo-500 animate-pulse text-lg font-semibold">Loading results...</div>
               ) : selectedQuizId ? (
                 quizResults.length === 0 ? (
-                  <div>No students have taken this quiz yet.</div>
+                  <div className="py-8 text-center text-gray-500 text-base font-medium">No students have taken this quiz yet.</div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full border text-sm">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="px-3 py-2 border">Student Name</th>
-                          <th className="px-3 py-2 border">Email</th>
-                          <th className="px-3 py-2 border">Taken At</th>
-                          <th className="px-3 py-2 border">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {quizResults.map((res: any) => {
-                          const user = students[res.studentId];
-                          return (
-                            <tr key={res._id}>
-                              <td className="px-3 py-2 border">{user?.name || res.studentId}</td>
-                              <td className="px-3 py-2 border">{user?.email || "-"}</td>
-                              <td className="px-3 py-2 border">
-                                {res.createdAt ? new Date(res.createdAt).toLocaleString() : "-"}
-                              </td>
-                              <td className="px-3 py-2 border">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleViewDetails(res)}
-                                  className="text-xs"
-                                >
-                                  View Details
-                                </Button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                    <div className="rounded-3xl shadow-2xl border border-indigo-200/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl">
+                      <table className="min-w-full text-sm">
+                        <thead>
+                          <tr className="bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100">
+                            <th className="px-6 py-4 text-base font-bold text-indigo-700 tracking-tight rounded-tl-3xl">Student Name</th>
+                            <th className="px-6 py-4 text-base font-bold text-purple-700 tracking-tight">Email</th>
+                            <th className="px-6 py-4 text-base font-bold text-pink-700 tracking-tight">Taken At</th>
+                            <th className="px-6 py-4 text-base font-bold text-slate-700 tracking-tight rounded-tr-3xl">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {quizResults.map((res: any, i: number) => {
+                            const user = students[res.studentId];
+                            return (
+                              <tr
+                                key={res._id}
+                                className={`transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:via-purple-50 hover:to-pink-50 ${i % 2 === 0 ? 'bg-white/60 dark:bg-slate-800/60' : 'bg-indigo-50/40 dark:bg-slate-700/40'} rounded-xl`}
+                                style={{ boxShadow: '0 2px 12px 0 rgba(112, 80, 255, 0.08)', borderRadius: '1rem' }}
+                              >
+                                <td className="px-6 py-4 whitespace-nowrap flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-400 via-purple-400 to-pink-400 flex items-center justify-center text-base font-bold text-white shadow border-2 border-white">
+                                    {user?.name?.[0] || res.studentId?.[0] || "?"}
+                                  </div>
+                                  <span className="font-semibold text-indigo-700 text-sm">{user?.name || res.studentId}</span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-tr from-purple-100 via-pink-100 to-indigo-100 text-purple-700 font-semibold text-xs shadow border border-purple-200/40">
+                                    {user?.email || "-"}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-tr from-pink-100 via-indigo-100 to-purple-100 text-pink-700 font-semibold text-xs shadow border border-pink-200/40">
+                                    {res.createdAt ? new Date(res.createdAt).toLocaleString() : "-"}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleViewDetails(res)}
+                                    className="text-xs border-indigo-300 text-indigo-700 dark:text-indigo-300 font-semibold rounded-xl px-4 py-2 transition-all hover:bg-indigo-50 hover:scale-105 hover:shadow"
+                                  >
+                                    View Details
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )
               ) : (
-                <div>Select a quiz to view student results.</div>
+                <div className="py-8 text-center text-indigo-400 text-base font-semibold animate-pulse">Select a quiz to view student results.</div>
               )}
             </CardContent>
           </Card>

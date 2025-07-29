@@ -69,13 +69,12 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col gap-1">
-                    <div className="px-4 py-2 rounded-2xl shadow-lg backdrop-blur-md bg-gradient-to-r from-blue-100/80 via-indigo-100/80 to-purple-100/80 border border-blue-200/30">
-                      <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 drop-shadow-lg tracking-tight flex items-center gap-2">
-                        <BarChart3 className="w-7 h-7 text-indigo-400" />
+                    <>
+                      <h2 className="text-2xl font-extrabold text-black tracking-tight">
                         Student Panel
                       </h2>
-                      <p className="text-sm font-medium text-blue-700/80 tracking-wide mt-1">Learning Dashboard</p>
-                    </div>
+                      <p className="text-sm font-medium text-black tracking-wide mt-1">Learning Dashboard</p>
+                    </>
                   </div>
                 </div>
               </div>

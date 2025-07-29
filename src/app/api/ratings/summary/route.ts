@@ -31,6 +31,11 @@ export async function GET(req: NextRequest) {
     const studentIds = [...new Set(ratings.map((r) => r.studentId))];
     const users = await User.find({ _id: { $in: studentIds } }).select("_id name");
     userMap = Object.fromEntries(users.map((u) => [u._id.toString(), u.name]));
+  } else if (studentId) {
+    // For student, fetch all tutor names
+    const tutorIds = [...new Set(ratings.map((r) => r.tutorId))];
+    const users = await User.find({ _id: { $in: tutorIds } }).select("_id name");
+    userMap = Object.fromEntries(users.map((u) => [u._id.toString(), u.name]));
   }
 
   const rows = ratings.map((rating) => {
@@ -42,6 +47,7 @@ export async function GET(req: NextRequest) {
       score: rating.score,
       comment: rating.comment,
       ...(tutorId && { student: userMap[rating.studentId] || rating.studentId }),
+      ...(studentId && { tutor: userMap[rating.tutorId] || rating.tutorId }),
     };
   });
 
